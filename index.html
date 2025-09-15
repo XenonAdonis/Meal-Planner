@@ -38,7 +38,7 @@
             border-top: 1px solid rgba(236, 240, 241, 0.2);
             margin: 30px 0;
         }
-        .controls, .suggestion-container, #newRecipeSection {
+        .controls, .suggestion-container {
             text-align: center;
             margin-bottom: 20px;
         }
@@ -261,8 +261,6 @@
             <form id="newTakeoutForm">
                 <label for="newTakeoutName">Restaurant Name:</label>
                 <input type="text" id="newTakeoutName" required>
-                <label for="newTakeoutPrice">Estimated Price ($):</label>
-                <input type="number" id="newTakeoutPrice" step="0.01" required>
                 <button type="submit">Add Takeout Idea</button>
             </form>
         </div>
@@ -274,16 +272,17 @@
             "Chicken Adobo": { ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Garlic", "Bay Leaves", "Peppercorns"], price: 4.60, side: "White Rice", recipe: "https://www.allrecipes.com/recipe/262843/chicken-adobo/" },
             "Lasagna": { ingredients: ["Ground Beef", "Lasagna Noodles", "Ricotta Cheese", "Mozzarella Cheese", "Marinara Sauce", "Onion"], price: 6.25, side: "Garlic Bread", recipe: "#" },
             "Taco Bar": { ingredients: ["Ground Beef", "Taco Shells", "Lettuce", "Tomatoes", "Shredded Cheese", "Salsa", "Sour Cream"], price: 5.50, side: null, recipe: "#" },
+            "Baked Potato Bar": { ingredients: ["Potatoes", "Cheese", "Sour Cream", "Butter", "Bacon", "Salsa"], price: 5.50, side: null, recipe: "#" },
         };
         const sides = ["Brussels Sprouts", "Corn on the Cob", "Side Salad"];
         let restaurants = [
-            { name: "Taco Truck", price: 50.00 },
-            { name: "LawLers Barbecue", price: 40.00 },
-            { name: "Subway", price: 45.00 },
-            { name: "China Cook", price: 35.00 },
-            { name: "Publix Subs", price: 45.00 },
-            { name: "Asian Express", price: 40.00 }, // <-- Comma added here
-            { name: "Jet's Pizza", price: 35.00 }   // <-- New entry added
+            "Taco Truck",
+            "LawLers Barbecue",
+            "Subway",
+            "China Cook",
+            "Publix Subs",
+            "Asian Express",
+            "Jet's Pizza"
         ];
     
         // --- DOM ELEMENT REFERENCES ---
@@ -375,9 +374,9 @@
         });
     
         generateTakeoutButton.addEventListener('click', () => {
-            const randomRestaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
-            const suggestionText = `Takeout from: ${randomRestaurant.name}`;
-            createDraggableItem(suggestionText, 'takeout', randomRestaurant.name);
+            const randomRestaurantName = restaurants[Math.floor(Math.random() * restaurants.length)];
+            const suggestionText = `Takeout from: ${randomRestaurantName}`;
+            createDraggableItem(suggestionText, 'takeout', randomRestaurantName);
         });
     
         generateListButton.addEventListener('click', () => {
@@ -391,11 +390,7 @@
                     const itemName = mealItem.dataset.name;
                     const itemType = mealItem.dataset.type;
                     if (itemType === 'takeout') {
-                        const restaurant = restaurants.find(r => r.name === itemName);
-                        if (restaurant) {
-                            groceryListHTML += `<li><strong>${day.id.charAt(0).toUpperCase() + day.id.slice(1)}:</strong> Takeout from ${restaurant.name} (Est. $${restaurant.price.toFixed(2)})</li>`;
-                            totalCost += restaurant.price;
-                        }
+                        groceryListHTML += `<li><strong>${day.id.charAt(0).toUpperCase() + day.id.slice(1)}:</strong> Takeout from ${itemName}</li>`;
                     } else {
                         const meal = mealData[itemName];
                         if (meal) {
@@ -453,20 +448,19 @@
         newTakeoutForm.addEventListener('submit', (event) => {
             event.preventDefault();
             const takeoutName = document.getElementById('newTakeoutName').value.trim();
-            const takeoutPrice = parseFloat(document.getElementById('newTakeoutPrice').value);
             
-            if (!takeoutName || isNaN(takeoutPrice)) {
-                alert("Please fill out both the name and a valid price.");
+            if (!takeoutName) {
+                alert("Please fill out the restaurant name.");
                 return;
             }
 
-            const alreadyExists = restaurants.some(r => r.name.toLowerCase() === takeoutName.toLowerCase());
+            const alreadyExists = restaurants.some(r => r.toLowerCase() === takeoutName.toLowerCase());
             if (alreadyExists) {
                 alert(`"${takeoutName}" is already in your takeout list.`);
                 return;
             }
 
-            restaurants.push({ name: takeoutName, price: takeoutPrice });
+            restaurants.push(takeoutName);
             saveRestaurants();
             alert(`"${takeoutName}" has been added to your takeout ideas!`);
             newTakeoutForm.reset();
@@ -486,7 +480,7 @@
             mealTextSpan.textContent = text;
             mealItemDiv.appendChild(mealTextSpan);
             
-            if (text.includes(' with ')) {
+            if (type === 'meal' && text.includes(' with ')) {
                 const removeSideBtn = document.createElement('button');
                 removeSideBtn.className = 'remove-side-btn';
                 removeSideBtn.textContent = '(no side)';
