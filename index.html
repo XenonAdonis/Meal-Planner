@@ -38,7 +38,7 @@
             border-top: 1px solid rgba(236, 240, 241, 0.2);
             margin: 30px 0;
         }
-        .controls, .suggestion-container {
+        .controls, .suggestion-container, #newRecipeSection {
             text-align: center;
             margin-bottom: 20px;
         }
@@ -274,13 +274,16 @@
             "Chicken Adobo": { ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Garlic", "Bay Leaves", "Peppercorns"], price: 4.60, side: "White Rice", recipe: "https://www.allrecipes.com/recipe/262843/chicken-adobo/" },
             "Lasagna": { ingredients: ["Ground Beef", "Lasagna Noodles", "Ricotta Cheese", "Mozzarella Cheese", "Marinara Sauce", "Onion"], price: 6.25, side: "Garlic Bread", recipe: "#" },
             "Taco Bar": { ingredients: ["Ground Beef", "Taco Shells", "Lettuce", "Tomatoes", "Shredded Cheese", "Salsa", "Sour Cream"], price: 5.50, side: null, recipe: "#" },
-            "Baked Potato Bar": { ingredients: ["Potatoes", "Cheese", "Sour Cream", "Butter", "Bacon", "Salsa"], price: 5.50, side: null, recipe: "#" },
         };
         const sides = ["Brussels Sprouts", "Corn on the Cob", "Side Salad"];
         let restaurants = [
-            { name: "Tortora's", price: 50.00 }, { name: "LawLers Barbecue", price: 40.00 },
-            { name: "Buenavista Cantina", price: 45.00 }, { name: "China Cook", price: 35.00 },
-            { name: "Chili's Grill & Bar", price: 45.00 }, { name: "Lola's Cocina", price: 40.00 },
+            { name: "Tortora's", price: 50.00 },
+            { name: "LawLers Barbecue", price: 40.00 },
+            { name: "Buenavista Cantina", price: 45.00 },
+            { name: "China Cook", price: 35.00 },
+            { name: "Chili's Grill & Bar", price: 45.00 },
+            { name: "Lola's Cocina", price: 40.00 }, // <-- Comma added here
+            { name: "Jet's Pizza", price: 35.00 }   // <-- New entry added
         ];
     
         // --- DOM ELEMENT REFERENCES ---
