@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaba Weekly Meal Planner</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Dark Mode Palette & General Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            background-color: #2c3e50; /* Fallback color */
+            color: #ecf0f1; /* Light gray text */
+            background-image: url('https://images.unsplash.com/photo-1488477181314-1e0398829b33?auto=format&fit=crop&w=1770');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #ecf0f1;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        h1 {
+            font-family: 'Josefin Sans', sans-serif; /* New Modern Font */
+            font-weight: 600;
+            font-size: 2.5rem;
+        }
+        h2 { font-size: 1.75rem; }
+        hr {
+            border: none;
+            border-top: 1px solid rgba(236, 240, 241, 0.2);
+            margin: 30px 0;
+        }
+        .controls, .suggestion-container, #newRecipeSection {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button, input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: auto;
+            max-width: 300px;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        #suggestionBox {
+            padding: 15px; margin: 10px auto;
+            border: 2px dashed #3498db;
+            background-color: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            min-height: 50px; width: 90%; max-width: 500px;
+            border-radius: 8px;
+        }
+        .meal-item {
+            background-color: #2980b9; border: 1px solid #3498db;
+            color: #fff; padding: 10px; border-radius: 5px; cursor: move;
+            text-align: center; position: relative; padding-right: 25px; margin-bottom: 5px;
+        }
+        .clear-btn {
+            position: absolute; top: 2px; right: 5px;
+            background: none; border: none; font-size: 18px;
+            font-weight: bold; cursor: pointer; color: #ecf0f1;
+        }
+        .recipe-link {
+            font-size: 0.8em; margin-left: 8px; color: #9ad4f5; text-decoration: none;
+        }
+        .recipe-link:hover { text-decoration: underline; }
+        .calendar-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap; 
+        }
+        .day {
+            flex-grow: 1; 
+            min-width: 150px;
+            max-width: 200px;
+            min-height: 150px;
+            border: 1px solid rgba(236, 240, 241, 0.2);
+            border-radius: 8px;
+            background-color: rgba(44, 62, 80, 0.9); /* Semi-transparent */
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(5px);
+            padding: 10px;
+            margin: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        #groceryListContainer, #newRecipeSection {
+            margin: 30px auto; padding: 20px;
+            border: 1px solid rgba(236, 240, 241, 0.2);
+            border-radius: 8px;
+            background-color: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            max-width: 900px;
+        }
+        input, textarea {
+            width: calc(100% - 24px); padding: 12px; margin-bottom: 10px;
+            border-radius: 5px; border: 1px solid #2c3e50; font-size: 16px;
+            background-color: #ecf0f1; color: #2c3e50;
+        }
+        #newRecipeForm { max-width: 600px; margin: auto; text-align: left; }
+        #newRecipeForm label { display: block; margin-bottom: 5px; font-weight: bold; }
+        #newRecipeForm button { width: 100%; background-color: #27ae60; }
+        #newRecipeForm button:hover { background-color: #229954; }
+
+        .quick-add-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+        .quick-add-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: 45px;
+            background-color: #16a085; /* Teal color */
+        }
+        .quick-add-btn:hover {
+            background-color: #117a65; /* Darker teal */
+        }
+
+        /* --- Mobile Responsive Styles --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .controls button {
+                width: 90%;
+                margin-bottom: 10px;
+            }
+            .day {
+                flex-basis: 40%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .day {
+                flex-basis: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Gaba Weekly Meal Planner</h1>
+
+    <div class="controls">
+        <button id="generateMealButton">Generate Home-Cooked Meal</button>
+        <button id="viewMealsButton" style="background-color: #16a085;">View Meal List</button>
+        <button id="generateTakeoutButton">Generate Takeout Idea</button>
+    </div>
+
+    <div class="controls">
+        <label for="servingsInput">Number of Servings: </label>
+        <input type="number" id="servingsInput" value="4" min="1" style="width: 60px;">
+    </div>
+
+    <h2>Drag the meal idea or click on the day of the week to the boxes below</h2>
+    <div class="suggestion-container">
+        <div id="suggestionBox"></div>
+    </div>
+    
+    <hr>
+    
+    <div id="menu-print-wrapper">
+        <h2 id="menu-title" style="display: none;">Weekly Menu</h2>
+        <div class="calendar-container">
+            <div class="day" id="sunday"><h3>Sunday</h3></div>
+            <div class="day" id="monday"><h3>Monday</h3></div>
+            <div class="day" id="tuesday"><h3>Tuesday</h3></div>
+            <div class="day" id="wednesday"><h3>Wednesday</h3></div>
+            <div class="day" id="thursday"><h3>Thursday</h3></div>
+            <div class="day" id="friday"><h3>Friday</h3></div>
+            <div class="day" id="saturday"><h3>Saturday</h3></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="generateListButton">Generate Weekly Grocery List</button>
+        <button id="resetWeekButton" style="background-color: #c0392b;">Reset Week</button>
+        <button id="printMenuButton" style="background-color: #8e44ad;">Print Weekly Menu</button>
+        <button id="printListButton" style="background-color: #8e44ad;">Print Grocery List</button>
+    </div>
+
+    <div id="groceryListContainer">
+        <h2>Your Grocery List & Budget</h2>
+        <div id="groceryListOutput">Your list will appear here after you plan your week.</div>
+    </div>
+
+    <div id="newRecipeSection">
+        <h2>Add a New Recipe</h2>
+        <form id="newRecipeForm">
+            <label for="newMealName">Meal Name:</label>
+            <input type="text" id="newMealName" required>
+            <label for="newIngredients">Ingredients (comma-separated):</label>
+            <textarea id="newIngredients" rows="3" required placeholder="e.g., Chicken, Rice, Broccoli..."></textarea>
+            <label for="newPrice">Price per Serving ($):</label>
+            <input type="number" id="newPrice" step="0.01" required>
+            <label for="newSide">Pre-defined Side (optional):</label>
+            <input type="text" id="newSide">
+            <label for="newRecipeUrl">Recipe URL (optional):</label>
+            <input type="url" id="newRecipeUrl">
+            <button type="submit">Add Recipe to List</button>
+        </form>
+    </div>
+
+    <script>
+        // --- DATA SECTION ---
+        let mealData = {
+            "Chicken Adobo": { ingredients: ["Chicken Thighs", "Soy Sauce", "Vinegar", "Garlic", "Bay Leaves", "Peppercorns"], price: 4.60, side: "White Rice", recipe: "https://www.allrecipes.com/recipe/262843/chicken-adobo/" },
+            "Lasagna": { ingredients: ["Ground Beef", "Lasagna Noodles", "Ricotta Cheese", "Mozzarella Cheese", "Marinara Sauce", "Onion"], price: 6.25, side: "Garlic Bread", recipe: "#" },
+            "Taco Bar": { ingredients: ["Ground Beef", "Taco Shells", "Lettuce", "Tomatoes", "Shredded Cheese", "Salsa", "Sour Cream"], price: 5.50, side: null, recipe: "#" },
+        };
+        const sides = ["Brussels Sprouts", "Corn on the Cob", "Side Salad"];
+        const restaurants = [
+            { name: "Tortora's", price: 50.00 }, { name: "LawLers Barbecue", price: 40.00 },
+            { name: "Buenavista Cantina", price: 45.00 }, { name: "China Cook", price: 35.00 },
+            { name: "Chili's Grill & Bar", price: 45.00 }, { name: "Lola's Cocina", price: 40.00 },
+        ];
+    
+        // --- DOM ELEMENT REFERENCES ---
+        const viewMealsButton = document.getElementById('viewMealsButton');
+        const generateMealButton = document.getElementById('generateMealButton');
+        const generateTakeoutButton = document.getElementById('generateTakeoutButton');
+        const generateListButton = document.getElementById('generateListButton');
+        const resetWeekButton = document.getElementById('resetWeekButton');
+        const printMenuButton = document.getElementById('printMenuButton');
+        const printListButton = document.getElementById('printListButton');
+        const newRecipeForm = document.getElementById('newRecipeForm');
+        const suggestionBox = document.getElementById('suggestionBox');
+        const groceryListOutput = document.getElementById('groceryListOutput');
+        const servingsInput = document.getElementById('servingsInput');
+        const days = document.querySelectorAll('.day');
+        let draggedItem = null;
+    
+        // --- MOBILE-FRIENDLY PRINT FUNCTION ---
+        function printSection(elementId, orientation = 'portrait') {
+            const printContent = document.getElementById(elementId).innerHTML;
+            const allStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+                .map(style => style.outerHTML)
+                .join('');
+            
+            const printFrame = document.createElement('iframe');
+            printFrame.style.position = 'absolute';
+            printFrame.style.width = '0';
+            printFrame.style.height = '0';
+            printFrame.style.border = '0';
+            document.body.appendChild(printFrame);
+
+            const frameDoc = printFrame.contentWindow.document;
+            frameDoc.open();
+            frameDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print</title>
+                    ${allStyles}
+                    <style>
+                        @page { size: ${orientation}; margin: 20px; }
+                        body { margin: 0; -webkit-print-color-adjust: exact; color-adjust: exact; }
+                        h1, h2, h3, li, strong, div, p { color: #000 !important; }
+                        .calendar-container { flex-wrap: nowrap !important; }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            frameDoc.close();
+
+            setTimeout(() => {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+                setTimeout(() => {
+                    document.body.removeChild(printFrame);
+                }, 500);
+            }, 250);
+        }
+
+        // --- EVENT LISTENERS ---
+        viewMealsButton.addEventListener('click', () => {
+            const mealList = Object.keys(mealData).sort();
+            if (mealList.length === 0) {
+                alert("There are no meals in your list.");
+            } else {
+                alert("Current Meal List:\n\n- " + mealList.join('\n- '));
+            }
+        });
+    
+        generateMealButton.addEventListener('click', () => {
+            const mealNames = Object.keys(mealData);
+            if (mealNames.length === 0) {
+                alert("No meals available! Please add a recipe first."); return;
+            }
+            const randomMealName = mealNames[Math.floor(Math.random() * mealNames.length)];
+            const meal = mealData[randomMealName];
+            let suggestionText = randomMealName;
+            if (meal.side) {
+                suggestionText += ` with ${meal.side}`;
+            } else {
+                const randomSide = sides[Math.floor(Math.random() * sides.length)];
+                suggestionText += ` with ${randomSide}`;
+            }
+            createDraggableItem(suggestionText, 'meal', randomMealName);
+        });
+    
+        generateTakeoutButton.addEventListener('click', () => {
+            const randomRestaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
+            const suggestionText = `Takeout from: ${randomRestaurant.name}`;
+            createDraggableItem(suggestionText, 'takeout', randomRestaurant.name);
+        });
+    
+        generateListButton.addEventListener('click', () => {
+            const numServings = parseInt(servingsInput.value, 10) || 1;
+            let totalCost = 0;
+            const allIngredients = new Set();
+            let groceryListHTML = '<ul>';
+            days.forEach(day => {
+                const mealItem = day.querySelector('.meal-item');
+                if (mealItem) {
+                    const itemName = mealItem.dataset.name;
+                    const itemType = mealItem.dataset.type;
+                    if (itemType === 'takeout') {
+                        const restaurant = restaurants.find(r => r.name === itemName);
+                        if (restaurant) {
+                            groceryListHTML += `<li><strong>${day.id.charAt(0).toUpperCase() + day.id.slice(1)}:</strong> Takeout from ${restaurant.name} (Est. $${restaurant.price.toFixed(2)})</li>`;
+                            totalCost += restaurant.price;
+                        }
+                    } else {
+                        const meal = mealData[itemName];
+                        if (meal) {
+                            const mealCost = meal.price * numServings;
+                            meal.ingredients.forEach(ingredient => allIngredients.add(ingredient));
+                            if(meal.side) allIngredients.add(meal.side);
+                            groceryListHTML += `<li><strong>${day.id.charAt(0).toUpperCase() + day.id.slice(1)}:</strong> ${itemName} (${numServings} servings @ $${meal.price.toFixed(2)}/ea = $${mealCost.toFixed(2)})</li>`;
+                            totalCost += mealCost;
+                        }
+                    }
+                }
+            });
+            groceryListHTML += '</ul><hr style="border-top: 1px solid #4a637d;"><h3>Combined Grocery Items (for ' + numServings + ' servings):</h3><ul>';
+            allIngredients.forEach(ingredient => {
+                groceryListHTML += `<li>${ingredient}</li>`;
+            });
+            groceryListHTML += `</ul><hr style="border-top: 1px solid #4a637d;"><h3>Total Estimated Weekly Cost: $${totalCost.toFixed(2)}</h3>`;
+            groceryListOutput.innerHTML = groceryListHTML;
+        });
+    
+        resetWeekButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear the entire week?')) {
+                days.forEach(day => {
+                    const mealItem = day.querySelector('.meal-item');
+                    if (mealItem) mealItem.remove();
+                });
+                savePlan();
+                groceryListOutput.innerHTML = 'Your list will appear here after you plan your week.';
+            }
+        });
+    
+        printListButton.addEventListener('click', () => printSection('groceryListContainer', 'portrait'));
+        
+        printMenuButton.addEventListener('click', () => printSection('menu-print-wrapper', 'landscape'));
+    
+        newRecipeForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const mealName = document.getElementById('newMealName').value.trim();
+            const ingredients = document.getElementById('newIngredients').value.split(',').map(item => item.trim().replace(/\s+/g, ' ')).filter(item => item);
+            const price = parseFloat(document.getElementById('newPrice').value);
+            const side = document.getElementById('newSide').value.trim() || null;
+            const recipeUrl = document.getElementById('newRecipeUrl').value.trim() || '#';
+            if (!mealName || ingredients.length === 0 || isNaN(price)) {
+                alert("Please fill out Meal Name, Ingredients, and Price."); return;
+            }
+            if (mealData[mealName]) {
+                if (!confirm(`A recipe named "${mealName}" already exists. Do you want to overwrite it?`)) { return; }
+            }
+            mealData[mealName] = { ingredients, price, side, recipe: recipeUrl };
+            localStorage.setItem('mealPlannerData', JSON.stringify(mealData));
+            alert(`Recipe "${mealName}" has been saved!`);
+            newRecipeForm.reset();
+        });
+    
+        // --- DRAG & DROP AND HELPER FUNCTIONS ---
+        function createDraggableItem(text, type, name) {
+            suggestionBox.innerHTML = '';
+            
+            const mealItemDiv = document.createElement('div');
+            mealItemDiv.textContent = text;
+            mealItemDiv.className = 'meal-item';
+            mealItemDiv.draggable = true;
+            mealItemDiv.dataset.name = name;
+            mealItemDiv.dataset.type = type;
+            
+            mealItemDiv.addEventListener('dragstart', (event) => {
+                draggedItem = event.target;
+                setTimeout(() => { event.target.style.display = 'none'; }, 0);
+            });
+            mealItemDiv.addEventListener('dragend', () => {
+                setTimeout(() => {
+                    if (draggedItem) { draggedItem.style.display = 'block'; draggedItem = null; }
+                }, 0);
+            });
+            suggestionBox.appendChild(mealItemDiv);
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'quick-add-controls';
+            const dayIds = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+            dayIds.forEach(dayId => {
+                const button = document.createElement('button');
+                button.textContent = dayId.substring(0, 3).toUpperCase();
+                button.className = 'quick-add-btn';
+                button.addEventListener('click', (event) => {
+                    event.preventDefault(); 
+                    
+                    const targetDay = document.getElementById(dayId);
+                    const existingItem = targetDay.querySelector('.meal-item');
+                    if (existingItem) existingItem.remove();
+                    
+                    const newItem = document.createElement('div');
+                    newItem.textContent = text;
+                    newItem.className = 'meal-item';
+                    newItem.dataset.name = name;
+                    newItem.dataset.type = type;
+
+                    targetDay.appendChild(newItem);
+                    addMealControls(newItem);
+                    savePlan();
+                    
+                    setTimeout(() => {
+                        suggestionBox.innerHTML = '';
+                    }, 100);
+                });
+                buttonContainer.appendChild(button);
+            });
+            suggestionBox.appendChild(buttonContainer);
+        }
+    
+        function addMealControls(mealItem) {
+            const clearButton = document.createElement('button');
+            clearButton.innerHTML = '&times;'; clearButton.className = 'clear-btn';
+            clearButton.addEventListener('click', () => { mealItem.remove(); savePlan(); });
+            mealItem.appendChild(clearButton);
+            if (mealItem.dataset.type === 'meal') {
+                const mealDetails = mealData[mealItem.dataset.name];
+                if (mealDetails && mealDetails.recipe && mealDetails.recipe !== '#') {
+                    const recipeLink = document.createElement('a');
+                    recipeLink.href = mealDetails.recipe; recipeLink.textContent = '(recipe)';
+                    recipeLink.className = 'recipe-link'; recipeLink.target = '_blank';
+                    mealItem.appendChild(recipeLink);
+                }
+            }
+        }
+    
+        days.forEach(day => {
+            day.addEventListener('dragover', (event) => event.preventDefault());
+            day.addEventListener('drop', (event) => {
+                event.preventDefault();
+                if (draggedItem) {
+                    const existingItem = day.querySelector('.meal-item');
+                    if (existingItem) existingItem.remove();
+                    draggedItem.style.display = 'block'; day.appendChild(draggedItem);
+                    addMealControls(draggedItem); draggedItem = null; savePlan();
+                }
+            });
+        });
+    
+        // --- SAVE & LOAD FUNCTIONS ---
+        function savePlan() {
+            const plan = {};
+            days.forEach(day => {
+                const mealItem = day.querySelector('.meal-item');
+                if (mealItem) {
+                    plan[day.id] = {
+                        text: mealItem.textContent.replace(/×$|\(recipe\)$/g, '').trim(),
+                        name: mealItem.dataset.name, type: mealItem.dataset.type
+                    };
+                } else { plan[day.id] = null; }
+            });
+            localStorage.setItem('mealPlannerPlan', JSON.stringify(plan));
+        }
+    
+        function loadPlan() {
+            try {
+                const savedPlan = JSON.parse(localStorage.getItem('mealPlannerPlan'));
+                if (savedPlan) {
+                    Object.keys(savedPlan).forEach(dayId => {
+                        const itemData = savedPlan[dayId];
+                        if (itemData && itemData.name) {
+                            const dayElement = document.getElementById(dayId);
+                            if(dayElement){
+                                const newItem = document.createElement('div');
+                                newItem.textContent = itemData.text; newItem.className = 'meal-item';
+                                newItem.draggable = true; newItem.dataset.name = itemData.name;
+                                newItem.dataset.type = itemData.type;
+                                newItem.addEventListener('dragstart', (event) => { draggedItem = event.target; });
+                                dayElement.appendChild(newItem); addMealControls(newItem);
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Could not load saved plan:", e);
+            }
+        }
+    
+        function loadData() {
+            const savedData = localStorage.getItem('mealPlannerData');
+            if (savedData) { 
+                try {
+                    mealData = JSON.parse(savedData); 
+                } catch(e) {
+                    console.error("Error parsing meal data from localStorage", e);
+                }
+            }
+        }
+    
+        // --- INITIALIZE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            loadPlan();
+        });
+    </script>
+</body>
+</html>
