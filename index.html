@@ -275,7 +275,7 @@
             "Baked Potato Bar": { ingredients: ["Potatoes", "Cheese", "Sour Cream", "Butter", "Bacon", "Salsa"], price: 5.50, side: null, recipe: "#" },
             "Shake and Bake Chicken and Rice": { ingredients: ["Chicken", "Shake and Bake", "Jasmine Rice"], price: 6.50, side: null, recipe: "#" },
         };
-       // const sides = ["Brussels Sprouts", "Corn on the Cob", "Side Salad"];
+        // The 'sides' array has been removed.
         let restaurants = [
             "Taco Truck",
             "LawLers Barbecue",
@@ -364,13 +364,14 @@
             }
             const randomMealName = mealNames[Math.floor(Math.random() * mealNames.length)];
             const meal = mealData[randomMealName];
+            
             let suggestionText = randomMealName;
+            
+            // Logic updated: only append a side if 'meal.side' is defined in mealData.
             if (meal.side) {
                 suggestionText += ` with ${meal.side}`;
-            } else {
-                const randomSide = sides[Math.floor(Math.random() * sides.length)];
-                suggestionText += ` with ${randomSide}`;
-            }
+            } 
+            
             createDraggableItem(suggestionText, 'meal', randomMealName);
         });
     
@@ -397,7 +398,7 @@
                         if (meal) {
                             const mealCost = meal.price * numServings;
                             meal.ingredients.forEach(ingredient => allIngredients.add(ingredient));
-                            if(meal.side) allIngredients.add(meal.side);
+                            if(meal.side) allIngredients.add(meal.side); // Checks for predefined side
                             groceryListHTML += `<li><strong>${day.id.charAt(0).toUpperCase() + day.id.slice(1)}:</strong> ${itemName} (${numServings} servings @ $${meal.price.toFixed(2)}/ea = $${mealCost.toFixed(2)})</li>`;
                             totalCost += mealCost;
                         }
